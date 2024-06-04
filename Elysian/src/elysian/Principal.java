@@ -130,10 +130,20 @@ public class Principal extends javax.swing.JFrame {
         });
 
         jButton2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/elysian/images/productrsz.png"))); // NOI18N
+        jButton2.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jButton2MouseClicked(evt);
+            }
+        });
 
         jButton3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/elysian/images/clientsrsz.png"))); // NOI18N
 
         jButton4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/elysian/images/orderrsz.png"))); // NOI18N
+        jButton4.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jButton4MouseClicked(evt);
+            }
+        });
 
         jButton5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/elysian/images/lout.png"))); // NOI18N
 
@@ -248,7 +258,7 @@ public class Principal extends javax.swing.JFrame {
         );
         LandingpageLayout.setVerticalGroup(
             LandingpageLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, 785, Short.MAX_VALUE)
+            .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, 785, Short.MAX_VALUE)
         );
 
         jPanellp.setBackground(new java.awt.Color(240, 211, 200));
@@ -892,11 +902,11 @@ public class Principal extends javax.swing.JFrame {
     }//GEN-LAST:event_jToggleButton1MouseClicked
 
     private void jToggleButton2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jToggleButton2MouseClicked
-        // TODO add your handling code here:
+        
     }//GEN-LAST:event_jToggleButton2MouseClicked
 
     private void jToggleButton3MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jToggleButton3MouseClicked
-        // TODO add your handling code here:
+       
     }//GEN-LAST:event_jToggleButton3MouseClicked
 
     private void jToggleButton4MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jToggleButton4MouseClicked
@@ -922,6 +932,20 @@ public class Principal extends javax.swing.JFrame {
     private void jToggleButton13MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jToggleButton13MouseClicked
         // TODO add your handling code here:
     }//GEN-LAST:event_jToggleButton13MouseClicked
+
+    private void jButton4MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton4MouseClicked
+        Inventory.pack();
+        Inventory.setLocationRelativeTo(this);
+        Inventory.setVisible(true);
+        this.setVisible(false);
+    }//GEN-LAST:event_jButton4MouseClicked
+
+    private void jButton2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton2MouseClicked
+        Orders.pack();
+        Orders.setLocationRelativeTo(this);
+        Orders.setVisible(true);
+        this.setVisible(false);
+    }//GEN-LAST:event_jButton2MouseClicked
 
     /**
      * @param args the command line arguments
