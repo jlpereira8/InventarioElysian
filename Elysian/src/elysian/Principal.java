@@ -5,12 +5,32 @@
  */
 package elysian;
 
+import java.awt.List;
+import java.util.ArrayList;
+import javax.swing.JDialog;
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author j0c3lwiz
  */
 public class Principal extends javax.swing.JFrame {
 
+    // Lista estática para almacenar los diálogos abiertos
+    private static ArrayList<JDialog> dialogList = new ArrayList<>();
+
+    // Método para añadir un diálogo a la lista
+    public static void addDialog(JDialog dialog) {
+        dialogList.add(dialog);
+    }
+
+    // Método para cerrar todos los diálogos
+    public static void closeAllDialogs() {
+        for (JDialog dialog : dialogList) {
+            dialog.dispose();
+        }
+        dialogList.clear();
+    }
     /**
      * Creates new form Main
      */
@@ -170,6 +190,11 @@ public class Principal extends javax.swing.JFrame {
         });
 
         jButton5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/elysian/images/lout.png"))); // NOI18N
+        jButton5.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jButton5MouseClicked(evt);
+            }
+        });
 
         jLabel3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/elysian/images/login(2).jpg"))); // NOI18N
 
@@ -1072,6 +1097,7 @@ public class Principal extends javax.swing.JFrame {
         Landingpage.setLocationRelativeTo(this);
         Landingpage.setVisible(true);
         this.setVisible(false);
+        Principal.addDialog(Landingpage);
     }//GEN-LAST:event_jButton1MouseClicked
 
     private void jToggleButton1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jToggleButton1MouseClicked
@@ -1079,6 +1105,7 @@ public class Principal extends javax.swing.JFrame {
         Users.setLocationRelativeTo(this);
         Users.setVisible(true);
         this.setVisible(false);
+        Principal.addDialog(Users);
     }//GEN-LAST:event_jToggleButton1MouseClicked
 
     private void jToggleButton2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jToggleButton2MouseClicked
@@ -1118,6 +1145,7 @@ public class Principal extends javax.swing.JFrame {
         Inventory.setLocationRelativeTo(this);
         Inventory.setVisible(true);
         this.setVisible(false);
+        Principal.addDialog(Inventory);
     }//GEN-LAST:event_jButton4MouseClicked
 
     private void jButton2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton2MouseClicked
@@ -1125,6 +1153,7 @@ public class Principal extends javax.swing.JFrame {
         Orders.setLocationRelativeTo(this);
         Orders.setVisible(true);
         this.setVisible(false);
+        Principal.addDialog(Orders);
     }//GEN-LAST:event_jButton2MouseClicked
 
     private void jToggleButton8MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jToggleButton8MouseClicked
@@ -1144,7 +1173,15 @@ public class Principal extends javax.swing.JFrame {
         Clientes.setLocationRelativeTo(this);
         Clientes.setVisible(true);
         this.setVisible(false);
+        Principal.addDialog(Clientes);
     }//GEN-LAST:event_jButton3MouseClicked
+
+    private void jButton5MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton5MouseClicked
+        // TODO add your handling code here:
+        Principal.closeAllDialogs();
+        this.setVisible(true); 
+        JOptionPane.showMessageDialog(this, "¡Has cerrado sesión exitosamente!", "Cerrar sesión", JOptionPane.INFORMATION_MESSAGE);
+    }//GEN-LAST:event_jButton5MouseClicked
 
     /**
      * @param args the command line arguments
