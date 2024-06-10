@@ -64,6 +64,7 @@ public class Principal extends javax.swing.JFrame {
         jLabel12 = new javax.swing.JLabel();
         jLabel13 = new javax.swing.JLabel();
         Users = new javax.swing.JDialog();
+        jTabbedPane2 = new javax.swing.JTabbedPane();
         jPanellp = new javax.swing.JPanel();
         jToggleButton2 = new javax.swing.JToggleButton();
         jTextField1 = new javax.swing.JTextField();
@@ -78,6 +79,12 @@ public class Principal extends javax.swing.JFrame {
         jPasswordField2 = new javax.swing.JPasswordField();
         jLabel20 = new javax.swing.JLabel();
         jComboBox1 = new javax.swing.JComboBox<>();
+        jPanellp5 = new javax.swing.JPanel();
+        jToggleButton15 = new javax.swing.JToggleButton();
+        jLabel48 = new javax.swing.JLabel();
+        jToggleButton16 = new javax.swing.JToggleButton();
+        jScrollPane5 = new javax.swing.JScrollPane();
+        jTable5 = new javax.swing.JTable();
         Inventory = new javax.swing.JDialog();
         jPanellp1 = new javax.swing.JPanel();
         jToggleButton3 = new javax.swing.JToggleButton();
@@ -307,7 +314,7 @@ public class Principal extends javax.swing.JFrame {
         );
         LandingpageLayout.setVerticalGroup(
             LandingpageLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, 785, Short.MAX_VALUE)
+            .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, 785, Short.MAX_VALUE)
         );
 
         jPanellp.setBackground(new java.awt.Color(240, 211, 200));
@@ -365,7 +372,7 @@ public class Principal extends javax.swing.JFrame {
                     .addGroup(jPanellpLayout.createSequentialGroup()
                         .addGap(107, 107, 107)
                         .addComponent(jLabel14)
-                        .addGap(0, 121, Short.MAX_VALUE)))
+                        .addGap(0, 160, Short.MAX_VALUE)))
                 .addContainerGap())
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanellpLayout.createSequentialGroup()
                 .addGap(0, 0, Short.MAX_VALUE)
@@ -382,7 +389,7 @@ public class Principal extends javax.swing.JFrame {
         jPanellpLayout.setVerticalGroup(
             jPanellpLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanellpLayout.createSequentialGroup()
-                .addGap(73, 73, 73)
+                .addGap(109, 109, 109)
                 .addComponent(jLabel14)
                 .addGap(99, 99, 99)
                 .addGroup(jPanellpLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -401,20 +408,90 @@ public class Principal extends javax.swing.JFrame {
                 .addGroup(jPanellpLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel20)
                     .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 100, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jToggleButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(61, 61, 61))
         );
+
+        jTabbedPane2.addTab("Registrar", jPanellp);
+
+        jPanellp5.setBackground(new java.awt.Color(240, 211, 200));
+        jPanellp5.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+
+        jToggleButton15.setBackground(new java.awt.Color(255, 255, 255));
+        jToggleButton15.setText("Modificar Usuario");
+        jToggleButton15.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jToggleButton15MouseClicked(evt);
+            }
+        });
+
+        jToggleButton16.setBackground(new java.awt.Color(255, 255, 255));
+        jToggleButton16.setText("Eliminar Usuario");
+        jToggleButton16.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jToggleButton16MouseClicked(evt);
+            }
+        });
+
+        jTable5.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "Nombre", "Apellido", "Correo", "Estado", "Contraseña"
+            }
+        ));
+        jScrollPane5.setViewportView(jTable5);
+
+        javax.swing.GroupLayout jPanellp5Layout = new javax.swing.GroupLayout(jPanellp5);
+        jPanellp5.setLayout(jPanellp5Layout);
+        jPanellp5Layout.setHorizontalGroup(
+            jPanellp5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanellp5Layout.createSequentialGroup()
+                .addGap(279, 279, 279)
+                .addComponent(jLabel48)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanellp5Layout.createSequentialGroup()
+                .addGap(0, 77, Short.MAX_VALUE)
+                .addGroup(jPanellp5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jToggleButton15, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(100, 100, 100))
+            .addGroup(jPanellp5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanellp5Layout.createSequentialGroup()
+                    .addGap(85, 85, 85)
+                    .addComponent(jToggleButton16, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addContainerGap(354, Short.MAX_VALUE)))
+        );
+        jPanellp5Layout.setVerticalGroup(
+            jPanellp5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanellp5Layout.createSequentialGroup()
+                .addGap(82, 82, 82)
+                .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel48)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jToggleButton15, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(56, 56, 56))
+            .addGroup(jPanellp5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanellp5Layout.createSequentialGroup()
+                    .addContainerGap(539, Short.MAX_VALUE)
+                    .addComponent(jToggleButton16, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGap(54, 54, 54)))
+        );
+
+        jTabbedPane2.addTab("Manejo de usaurios", jPanellp5);
 
         javax.swing.GroupLayout UsersLayout = new javax.swing.GroupLayout(Users.getContentPane());
         Users.getContentPane().setLayout(UsersLayout);
         UsersLayout.setHorizontalGroup(
             UsersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanellp, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addComponent(jTabbedPane2)
         );
         UsersLayout.setVerticalGroup(
             UsersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanellp, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addComponent(jTabbedPane2)
         );
 
         jPanellp1.setBackground(new java.awt.Color(240, 211, 200));
@@ -540,10 +617,10 @@ public class Principal extends javax.swing.JFrame {
                                 .addGroup(jPanellp1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                     .addComponent(jLabel27)
                                     .addComponent(jComboBox3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                        .addGap(0, 229, Short.MAX_VALUE))
+                        .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(jPanellp1Layout.createSequentialGroup()
                         .addGap(185, 185, 185)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 450, Short.MAX_VALUE)))
                 .addGap(18, 18, 18)
                 .addGroup(jPanellp1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jToggleButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -561,9 +638,7 @@ public class Principal extends javax.swing.JFrame {
         );
         InventoryLayout.setVerticalGroup(
             InventoryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(InventoryLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jPanellp1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addComponent(jPanellp1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         jPanellp3.setBackground(new java.awt.Color(240, 211, 200));
@@ -1183,6 +1258,14 @@ public class Principal extends javax.swing.JFrame {
         JOptionPane.showMessageDialog(this, "¡Has cerrado sesión exitosamente!", "Cerrar sesión", JOptionPane.INFORMATION_MESSAGE);
     }//GEN-LAST:event_jButton5MouseClicked
 
+    private void jToggleButton15MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jToggleButton15MouseClicked
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jToggleButton15MouseClicked
+
+    private void jToggleButton16MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jToggleButton16MouseClicked
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jToggleButton16MouseClicked
+
     /**
      * @param args the command line arguments
      */
@@ -1276,6 +1359,7 @@ public class Principal extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel41;
     private javax.swing.JLabel jLabel42;
     private javax.swing.JLabel jLabel43;
+    private javax.swing.JLabel jLabel48;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
@@ -1291,6 +1375,7 @@ public class Principal extends javax.swing.JFrame {
     private javax.swing.JPanel jPanellp2;
     private javax.swing.JPanel jPanellp3;
     private javax.swing.JPanel jPanellp4;
+    private javax.swing.JPanel jPanellp5;
     private javax.swing.JPasswordField jPasswordField1;
     private javax.swing.JPasswordField jPasswordField2;
     private javax.swing.JRadioButton jRadioButton1;
@@ -1298,11 +1383,14 @@ public class Principal extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
+    private javax.swing.JScrollPane jScrollPane5;
     private javax.swing.JTabbedPane jTabbedPane1;
+    private javax.swing.JTabbedPane jTabbedPane2;
     private javax.swing.JTable jTable1;
     private javax.swing.JTable jTable2;
     private javax.swing.JTable jTable3;
     private javax.swing.JTable jTable4;
+    private javax.swing.JTable jTable5;
     private javax.swing.JTextField jTextField1;
     private javax.swing.JTextField jTextField2;
     private javax.swing.JTextField jTextField3;
@@ -1318,6 +1406,8 @@ public class Principal extends javax.swing.JFrame {
     private javax.swing.JToggleButton jToggleButton12;
     private javax.swing.JToggleButton jToggleButton13;
     private javax.swing.JToggleButton jToggleButton14;
+    private javax.swing.JToggleButton jToggleButton15;
+    private javax.swing.JToggleButton jToggleButton16;
     private javax.swing.JToggleButton jToggleButton2;
     private javax.swing.JToggleButton jToggleButton3;
     private javax.swing.JToggleButton jToggleButton4;
