@@ -5,9 +5,24 @@
  */
 package elysian;
 
+
+//BDD
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+//C:\Users\j0c3lwiz\Desktop\Elysian.accdb
+//Visuales
 import java.awt.List;
+import java.io.File;
 import java.util.ArrayList;
 import javax.swing.JDialog;
+import javax.swing.JOptionPane;
+import java.io.FileInputStream;
+import java.io.IOException;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
 /**
@@ -16,6 +31,53 @@ import javax.swing.JOptionPane;
  */
 public class Principal extends javax.swing.JFrame {
 
+
+    private static String DB_URL = "jdbc:ucanaccess://C:\\Users\\j0c3lwiz\\Desktop\\Elysian.accdb";
+    private static final String DB_USER = "";
+    private static final String DB_PASSWORD = "";
+    
+    // Variables para la conexión a la base de datos
+    private Connection conn;
+    
+    // Método para autenticar al usuario
+    private boolean authenticate(String email, String password) {
+        String query = "SELECT * FROM Usuarios WHERE Correo = ? AND Contraseña = ?";
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setString(1, email);
+            stmt.setString(2, password);
+            ResultSet rs = stmt.executeQuery();
+
+            return rs.next(); // Si hay un resultado, la autenticación es exitosa
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    // Método para actualizar la ruta de la base de datos
+    private void updateDatabasePath(String dbPath) {
+        // Cierra cualquier conexión anterior si es necesario
+        try {
+            if (conn != null && !conn.isClosed()) {
+                conn.close();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // Actualiza la conexión con la nueva ruta de la base de datos
+        DB_URL = "jdbc:ucanaccess://" + dbPath;
+        try {
+            conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+            JOptionPane.showMessageDialog(this, "Database path updated successfully!");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Failed to update database path!", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
     // Lista estática para almacenar los diálogos abiertos
     private static ArrayList<JDialog> dialogList = new ArrayList<>();
 
@@ -39,6 +101,8 @@ public class Principal extends javax.swing.JFrame {
         setLocationRelativeTo(null);
         
     }
+    
+    
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -63,6 +127,7 @@ public class Principal extends javax.swing.JFrame {
         jLabel11 = new javax.swing.JLabel();
         jLabel12 = new javax.swing.JLabel();
         jLabel13 = new javax.swing.JLabel();
+        jButton6 = new javax.swing.JButton();
         Users = new javax.swing.JDialog();
         jTabbedPane2 = new javax.swing.JTabbedPane();
         jPanellp = new javax.swing.JPanel();
@@ -148,6 +213,13 @@ public class Principal extends javax.swing.JFrame {
         jScrollPane4 = new javax.swing.JScrollPane();
         jTable4 = new javax.swing.JTable();
         jLabel43 = new javax.swing.JLabel();
+        Settings = new javax.swing.JDialog();
+        jPanellp6 = new javax.swing.JPanel();
+        jTextField10 = new javax.swing.JTextField();
+        jLabel44 = new javax.swing.JLabel();
+        jLabel46 = new javax.swing.JLabel();
+        jLabel49 = new javax.swing.JLabel();
+        jToggleButton18 = new javax.swing.JToggleButton();
         jPanel2 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
         jPanel1 = new javax.swing.JPanel();
@@ -264,29 +336,35 @@ public class Principal extends javax.swing.JFrame {
                 .addContainerGap(244, Short.MAX_VALUE))
         );
 
+        jButton6.setIcon(new javax.swing.ImageIcon(getClass().getResource("/elysian/images/settingsz.png"))); // NOI18N
+        jButton6.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jButton6MouseClicked(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addComponent(jLabel3)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGap(18, 18, 18)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addComponent(jToggleButton1)
                         .addGap(18, 18, 18)
-                        .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap(38, Short.MAX_VALUE))
-                    .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addGap(7, 7, 7)
-                        .addComponent(jToggleButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jButton4)
                         .addGap(18, 18, 18)
-                        .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jButton2)
                         .addGap(18, 18, 18)
-                        .addComponent(jButton5, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(33, 33, 33))))
+                        .addComponent(jButton3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jButton6)
+                        .addGap(10, 10, 10)
+                        .addComponent(jButton5)))
+                .addContainerGap(38, Short.MAX_VALUE))
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -295,12 +373,13 @@ public class Principal extends javax.swing.JFrame {
                 .addGap(0, 0, Short.MAX_VALUE))
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jToggleButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton5, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jToggleButton1, javax.swing.GroupLayout.DEFAULT_SIZE, 70, Short.MAX_VALUE)
+                    .addComponent(jButton4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jButton3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jButton5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jButton6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(195, 195, 195))
@@ -1024,6 +1103,78 @@ public class Principal extends javax.swing.JFrame {
             .addComponent(jPanellp4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
+        jPanellp6.setBackground(new java.awt.Color(240, 211, 200));
+        jPanellp6.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+
+        jTextField10.setEditable(false);
+
+        jLabel44.setFont(new java.awt.Font("Segoe UI", 1, 36)); // NOI18N
+        jLabel44.setText("Ajustes");
+
+        jLabel46.setText("Ruta de la base:");
+
+        jToggleButton18.setBackground(new java.awt.Color(255, 255, 255));
+        jToggleButton18.setText("Establecer nueva ruta");
+        jToggleButton18.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jToggleButton18MouseClicked(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanellp6Layout = new javax.swing.GroupLayout(jPanellp6);
+        jPanellp6.setLayout(jPanellp6Layout);
+        jPanellp6Layout.setHorizontalGroup(
+            jPanellp6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanellp6Layout.createSequentialGroup()
+                .addGroup(jPanellp6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanellp6Layout.createSequentialGroup()
+                        .addGroup(jPanellp6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanellp6Layout.createSequentialGroup()
+                                .addGap(144, 144, 144)
+                                .addComponent(jToggleButton18, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(73, 73, 73)
+                                .addComponent(jLabel49))
+                            .addGroup(jPanellp6Layout.createSequentialGroup()
+                                .addGap(177, 177, 177)
+                                .addGroup(jPanellp6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel46)
+                                    .addComponent(jLabel44))))
+                        .addGap(0, 62, Short.MAX_VALUE))
+                    .addGroup(jPanellp6Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jTextField10)))
+                .addContainerGap())
+        );
+        jPanellp6Layout.setVerticalGroup(
+            jPanellp6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanellp6Layout.createSequentialGroup()
+                .addComponent(jLabel44)
+                .addGap(39, 39, 39)
+                .addComponent(jLabel46)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jTextField10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanellp6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanellp6Layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel49)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(jPanellp6Layout.createSequentialGroup()
+                        .addGap(35, 35, 35)
+                        .addComponent(jToggleButton18, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap(53, Short.MAX_VALUE))))
+        );
+
+        javax.swing.GroupLayout SettingsLayout = new javax.swing.GroupLayout(Settings.getContentPane());
+        Settings.getContentPane().setLayout(SettingsLayout);
+        SettingsLayout.setHorizontalGroup(
+            SettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanellp6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        SettingsLayout.setVerticalGroup(
+            SettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanellp6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+        );
+
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(240, 211, 200));
 
@@ -1168,11 +1319,25 @@ public class Principal extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton1MouseClicked
-        Landingpage.pack();
-        Landingpage.setLocationRelativeTo(this);
-        Landingpage.setVisible(true);
-        this.setVisible(false);
-        Principal.addDialog(Landingpage);
+    String email = jTextField4.getText();
+    String password = new String(jPasswordField1.getPassword());
+    if (email.equals("admin")&&password.equals("admin")) {
+            Landingpage.pack();
+            Landingpage.setLocationRelativeTo(this);
+            Landingpage.setVisible(true);
+            this.setVisible(false);
+            Principal.addDialog(Landingpage);
+    }else if (authenticate(email, password)) {
+            jToggleButton1.setVisible(false);
+            jButton6.setVisible(false);
+            Landingpage.pack();
+            Landingpage.setLocationRelativeTo(this);
+            Landingpage.setVisible(true);
+            this.setVisible(false);
+            Principal.addDialog(Landingpage);
+        } else {
+            JOptionPane.showMessageDialog(this, "Invalid credentials", "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_jButton1MouseClicked
 
     private void jToggleButton1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jToggleButton1MouseClicked
@@ -1266,6 +1431,28 @@ public class Principal extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_jToggleButton16MouseClicked
 
+    private void jButton6MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton6MouseClicked
+        Settings.pack();
+        Settings.setLocationRelativeTo(this);
+        Settings.setVisible(true);
+        this.setVisible(false);
+        Principal.addDialog(Settings);
+    }//GEN-LAST:event_jButton6MouseClicked
+
+    private void jToggleButton18MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jToggleButton18MouseClicked
+        // TODO add your handling code here:
+        jTextField10.setText(DB_URL);
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        int returnValue = fileChooser.showOpenDialog(this);
+
+        if (returnValue == JFileChooser.APPROVE_OPTION) {
+            File selectedFile = fileChooser.getSelectedFile();
+            String dbPath = selectedFile.getAbsolutePath();
+            updateDatabasePath(dbPath);
+        }
+    }//GEN-LAST:event_jToggleButton18MouseClicked
+
     /**
      * @param args the command line arguments
      */
@@ -1307,12 +1494,14 @@ public class Principal extends javax.swing.JFrame {
     private javax.swing.JDialog Inventory;
     private javax.swing.JDialog Landingpage;
     private javax.swing.JDialog Orders;
+    private javax.swing.JDialog Settings;
     private javax.swing.JDialog Users;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
+    private javax.swing.JButton jButton6;
     private javax.swing.JComboBox<String> jComboBox1;
     private javax.swing.JComboBox<String> jComboBox10;
     private javax.swing.JComboBox<String> jComboBox2;
@@ -1359,7 +1548,10 @@ public class Principal extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel41;
     private javax.swing.JLabel jLabel42;
     private javax.swing.JLabel jLabel43;
+    private javax.swing.JLabel jLabel44;
+    private javax.swing.JLabel jLabel46;
     private javax.swing.JLabel jLabel48;
+    private javax.swing.JLabel jLabel49;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
@@ -1376,6 +1568,7 @@ public class Principal extends javax.swing.JFrame {
     private javax.swing.JPanel jPanellp3;
     private javax.swing.JPanel jPanellp4;
     private javax.swing.JPanel jPanellp5;
+    private javax.swing.JPanel jPanellp6;
     private javax.swing.JPasswordField jPasswordField1;
     private javax.swing.JPasswordField jPasswordField2;
     private javax.swing.JRadioButton jRadioButton1;
@@ -1392,6 +1585,7 @@ public class Principal extends javax.swing.JFrame {
     private javax.swing.JTable jTable4;
     private javax.swing.JTable jTable5;
     private javax.swing.JTextField jTextField1;
+    private javax.swing.JTextField jTextField10;
     private javax.swing.JTextField jTextField2;
     private javax.swing.JTextField jTextField3;
     private javax.swing.JTextField jTextField4;
@@ -1408,6 +1602,7 @@ public class Principal extends javax.swing.JFrame {
     private javax.swing.JToggleButton jToggleButton14;
     private javax.swing.JToggleButton jToggleButton15;
     private javax.swing.JToggleButton jToggleButton16;
+    private javax.swing.JToggleButton jToggleButton18;
     private javax.swing.JToggleButton jToggleButton2;
     private javax.swing.JToggleButton jToggleButton3;
     private javax.swing.JToggleButton jToggleButton4;
