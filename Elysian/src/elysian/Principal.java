@@ -24,6 +24,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *
@@ -41,7 +42,7 @@ public class Principal extends javax.swing.JFrame {
     
     // Método para autenticar al usuario
     private boolean authenticate(String email, String password) {
-        String query = "SELECT * FROM Usuarios WHERE Correo = ? AND Contraseña = ?";
+        String query = "SELECT * FROM Usuarios WHERE Correo = ? AND Contraseña = ? AND Estado = 'Activado'";
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
@@ -76,6 +77,137 @@ public class Principal extends javax.swing.JFrame {
         } catch (SQLException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(this, "Failed to update database path!", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    private void insertUser(String nombre, String apellido, String correo, String contra, String estado) {
+        if (isEmailRegistered(correo)) {
+            JOptionPane.showMessageDialog(this, "El correo ya está registrado", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        String query = "INSERT INTO Usuarios (Nombre, Apellido, Correo, Contraseña, Estado) VALUES (?, ?, ?, ?, ?)";
+
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setString(1, nombre);
+            stmt.setString(2, apellido);
+            stmt.setString(3, correo);
+            stmt.setString(4, contra);
+            stmt.setString(5, estado);
+
+            stmt.executeUpdate();
+            JOptionPane.showMessageDialog(this, "Usuario registrado exitosamente");
+            users_name.setText("");
+            users_apellido.setText("");
+            users_correo.setText("");
+            users_password.setText("");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error al registrar el usuario", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private boolean isEmailRegistered(String email) {
+        String query = "SELECT COUNT(*) FROM Usuarios WHERE Correo = ?";
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setString(1, email);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                int count = rs.getInt(1);
+                return count > 0;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+    
+    private void loadUserData() {
+    String query = "SELECT * FROM Usuarios";
+    
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+
+            DefaultTableModel model = (DefaultTableModel) jTable5.getModel();
+            model.setRowCount(0); // Limpiar la tabla antes de cargar datos
+
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String correo = rs.getString("Correo");
+                String contrasena = rs.getString("Contraseña");
+                String nombre = rs.getString("Nombre");
+                String apellido = rs.getString("Apellido");
+                String estado = rs.getString("Estado");
+
+                model.addRow(new Object[]{id, correo, contrasena, nombre, apellido, estado});
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error al cargar los datos", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    private void deleteUser(int id) {
+        String query = "DELETE FROM Usuarios WHERE id = ?";
+
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setInt(1, id);
+            int rowsAffected = stmt.executeUpdate();
+
+            if (rowsAffected > 0) {
+                JOptionPane.showMessageDialog(this, "Usuario eliminado exitosamente");
+            } else {
+                JOptionPane.showMessageDialog(this, "Error al eliminar el usuario", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error al eliminar el usuario", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    private void saveChanges() {
+        DefaultTableModel model = (DefaultTableModel) jTable5.getModel();
+        int rowCount = model.getRowCount();
+
+        String query = "UPDATE Usuarios SET Correo = ?, Contraseña = ?, Nombre = ?, Apellido = ?, Estado = ? WHERE id = ?";
+
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            for (int i = 0; i < rowCount; i++) {
+                int id = (int) model.getValueAt(i, 0);
+                String correo = (String) model.getValueAt(i, 1);
+                String contrasena = (String) model.getValueAt(i, 2);
+                String nombre = (String) model.getValueAt(i, 3);
+                String apellido = (String) model.getValueAt(i, 4);
+                String estado = (String) model.getValueAt(i, 5);
+
+                stmt.setString(1, correo);
+                stmt.setString(2, contrasena);
+                stmt.setString(3, nombre);
+                stmt.setString(4, apellido);
+                stmt.setString(5, estado);
+                stmt.setInt(6, id);
+
+                stmt.addBatch();
+            }
+
+            stmt.executeBatch();
+            JOptionPane.showMessageDialog(this, "Cambios guardados exitosamente");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error al guardar los cambios", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
     // Lista estática para almacenar los diálogos abiertos
@@ -132,22 +264,22 @@ public class Principal extends javax.swing.JFrame {
         jTabbedPane2 = new javax.swing.JTabbedPane();
         jPanellp = new javax.swing.JPanel();
         jToggleButton2 = new javax.swing.JToggleButton();
-        jTextField1 = new javax.swing.JTextField();
+        users_name = new javax.swing.JTextField();
         jLabel14 = new javax.swing.JLabel();
         jLabel15 = new javax.swing.JLabel();
         jLabel16 = new javax.swing.JLabel();
-        jTextField2 = new javax.swing.JTextField();
+        users_apellido = new javax.swing.JTextField();
         jLabel17 = new javax.swing.JLabel();
-        jTextField3 = new javax.swing.JTextField();
+        users_correo = new javax.swing.JTextField();
         jLabel18 = new javax.swing.JLabel();
         jLabel19 = new javax.swing.JLabel();
-        jPasswordField2 = new javax.swing.JPasswordField();
         jLabel20 = new javax.swing.JLabel();
-        jComboBox1 = new javax.swing.JComboBox<>();
+        userscombo_estado = new javax.swing.JComboBox<>();
+        users_password = new javax.swing.JPasswordField();
         jPanellp5 = new javax.swing.JPanel();
         jToggleButton15 = new javax.swing.JToggleButton();
         jLabel48 = new javax.swing.JLabel();
-        jToggleButton16 = new javax.swing.JToggleButton();
+        borrar_table = new javax.swing.JToggleButton();
         jScrollPane5 = new javax.swing.JScrollPane();
         jTable5 = new javax.swing.JTable();
         Inventory = new javax.swing.JDialog();
@@ -396,6 +528,12 @@ public class Principal extends javax.swing.JFrame {
             .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, 785, Short.MAX_VALUE)
         );
 
+        jTabbedPane2.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jTabbedPane2MouseClicked(evt);
+            }
+        });
+
         jPanellp.setBackground(new java.awt.Color(240, 211, 200));
         jPanellp.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
 
@@ -420,12 +558,23 @@ public class Principal extends javax.swing.JFrame {
 
         jLabel20.setText("Estado:");
 
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Activado", "Desactivado" }));
+        userscombo_estado.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Activado", "Desactivado" }));
 
         javax.swing.GroupLayout jPanellpLayout = new javax.swing.GroupLayout(jPanellp);
         jPanellp.setLayout(jPanellpLayout);
         jPanellpLayout.setHorizontalGroup(
             jPanellpLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanellpLayout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addGroup(jPanellpLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanellpLayout.createSequentialGroup()
+                        .addComponent(jLabel20)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(userscombo_estado, javax.swing.GroupLayout.PREFERRED_SIZE, 195, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(150, 150, 150))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanellpLayout.createSequentialGroup()
+                        .addComponent(jToggleButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(191, 191, 191))))
             .addGroup(jPanellpLayout.createSequentialGroup()
                 .addGroup(jPanellpLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanellpLayout.createSequentialGroup()
@@ -434,36 +583,24 @@ public class Principal extends javax.swing.JFrame {
                             .addGroup(jPanellpLayout.createSequentialGroup()
                                 .addComponent(jLabel16)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jTextField1))
+                                .addComponent(users_name))
                             .addGroup(jPanellpLayout.createSequentialGroup()
                                 .addComponent(jLabel17)
                                 .addGap(19, 19, 19)
-                                .addComponent(jTextField3, javax.swing.GroupLayout.DEFAULT_SIZE, 173, Short.MAX_VALUE)))
+                                .addComponent(users_correo, javax.swing.GroupLayout.DEFAULT_SIZE, 173, Short.MAX_VALUE)))
                         .addGap(18, 18, 18)
                         .addGroup(jPanellpLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel15)
                             .addComponent(jLabel18)
                             .addComponent(jLabel19))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(18, 18, 18)
                         .addGroup(jPanellpLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jTextField2)
-                            .addComponent(jPasswordField2, javax.swing.GroupLayout.DEFAULT_SIZE, 199, Short.MAX_VALUE)))
+                            .addComponent(users_apellido, javax.swing.GroupLayout.DEFAULT_SIZE, 199, Short.MAX_VALUE)
+                            .addComponent(users_password)))
                     .addGroup(jPanellpLayout.createSequentialGroup()
                         .addGap(107, 107, 107)
-                        .addComponent(jLabel14)
-                        .addGap(0, 160, Short.MAX_VALUE)))
-                .addContainerGap())
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanellpLayout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
-                .addGroup(jPanellpLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanellpLayout.createSequentialGroup()
-                        .addComponent(jLabel20)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 195, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(150, 150, 150))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanellpLayout.createSequentialGroup()
-                        .addComponent(jToggleButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(191, 191, 191))))
+                        .addComponent(jLabel14)))
+                .addContainerGap(48, Short.MAX_VALUE))
         );
         jPanellpLayout.setVerticalGroup(
             jPanellpLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -472,22 +609,22 @@ public class Principal extends javax.swing.JFrame {
                 .addComponent(jLabel14)
                 .addGap(99, 99, 99)
                 .addGroup(jPanellpLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(users_name, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel16)
                     .addComponent(jLabel15)
-                    .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(users_apellido, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(39, 39, 39)
                 .addGroup(jPanellpLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel17)
-                    .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(users_correo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel18)
                     .addComponent(jLabel19)
-                    .addComponent(jPasswordField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(users_password, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(57, 57, 57)
                 .addGroup(jPanellpLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel20)
-                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(userscombo_estado, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 102, Short.MAX_VALUE)
                 .addComponent(jToggleButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(61, 61, 61))
         );
@@ -505,11 +642,11 @@ public class Principal extends javax.swing.JFrame {
             }
         });
 
-        jToggleButton16.setBackground(new java.awt.Color(255, 255, 255));
-        jToggleButton16.setText("Eliminar Usuario");
-        jToggleButton16.addMouseListener(new java.awt.event.MouseAdapter() {
+        borrar_table.setBackground(new java.awt.Color(255, 255, 255));
+        borrar_table.setText("Eliminar Usuario");
+        borrar_table.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                jToggleButton16MouseClicked(evt);
+                borrar_tableMouseClicked(evt);
             }
         });
 
@@ -518,7 +655,7 @@ public class Principal extends javax.swing.JFrame {
 
             },
             new String [] {
-                "Nombre", "Apellido", "Correo", "Estado", "Contraseña"
+                "ID", "Correo", "Contraseña", "Nombre", "Apellido", "Estado"
             }
         ));
         jScrollPane5.setViewportView(jTable5);
@@ -532,15 +669,17 @@ public class Principal extends javax.swing.JFrame {
                 .addComponent(jLabel48)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanellp5Layout.createSequentialGroup()
-                .addGap(0, 77, Short.MAX_VALUE)
-                .addGroup(jPanellp5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jToggleButton15, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(0, 339, Short.MAX_VALUE)
+                .addComponent(jToggleButton15, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(100, 100, 100))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanellp5Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 462, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(90, 90, 90))
             .addGroup(jPanellp5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(jPanellp5Layout.createSequentialGroup()
                     .addGap(85, 85, 85)
-                    .addComponent(jToggleButton16, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(borrar_table, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addContainerGap(354, Short.MAX_VALUE)))
         );
         jPanellp5Layout.setVerticalGroup(
@@ -556,7 +695,7 @@ public class Principal extends javax.swing.JFrame {
             .addGroup(jPanellp5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanellp5Layout.createSequentialGroup()
                     .addContainerGap(539, Short.MAX_VALUE)
-                    .addComponent(jToggleButton16, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(borrar_table, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGap(54, 54, 54)))
         );
 
@@ -1322,6 +1461,8 @@ public class Principal extends javax.swing.JFrame {
     String email = jTextField4.getText();
     String password = new String(jPasswordField1.getPassword());
     if (email.equals("admin")&&password.equals("admin")) {
+            jToggleButton1.setVisible(true);
+            jButton6.setVisible(true);
             Landingpage.pack();
             Landingpage.setLocationRelativeTo(this);
             Landingpage.setVisible(true);
@@ -1349,7 +1490,14 @@ public class Principal extends javax.swing.JFrame {
     }//GEN-LAST:event_jToggleButton1MouseClicked
 
     private void jToggleButton2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jToggleButton2MouseClicked
+        //userscombo_estado
+        String nombre = users_name.getText();
+        String apellido = users_apellido.getText();
+        String correo = users_correo.getText();
+        String contra = users_password.getText();
+        String estado = userscombo_estado.getSelectedItem().toString();
         
+        insertUser(nombre, apellido, correo, contra, estado);
     }//GEN-LAST:event_jToggleButton2MouseClicked
 
     private void jToggleButton3MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jToggleButton3MouseClicked
@@ -1424,12 +1572,25 @@ public class Principal extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton5MouseClicked
 
     private void jToggleButton15MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jToggleButton15MouseClicked
-        // TODO add your handling code here:
+        saveChanges();
     }//GEN-LAST:event_jToggleButton15MouseClicked
 
-    private void jToggleButton16MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jToggleButton16MouseClicked
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jToggleButton16MouseClicked
+    private void borrar_tableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_borrar_tableMouseClicked
+    int selectedRow = jTable5.getSelectedRow();
+    
+    if (selectedRow == -1) {
+        JOptionPane.showMessageDialog(this, "Selecciona una fila para eliminar", "Error", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+    
+    int id = (int) jTable5.getValueAt(selectedRow, 0); // Asumiendo que la columna 0 es el ID
+    
+    // Llama al método para eliminar el usuario de la base de datos
+    deleteUser(id);
+    
+    // Actualiza la tabla después de eliminar el registro
+    loadUserData();
+    }//GEN-LAST:event_borrar_tableMouseClicked
 
     private void jButton6MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton6MouseClicked
         Settings.pack();
@@ -1452,6 +1613,11 @@ public class Principal extends javax.swing.JFrame {
             updateDatabasePath(dbPath);
         }
     }//GEN-LAST:event_jToggleButton18MouseClicked
+
+    private void jTabbedPane2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTabbedPane2MouseClicked
+        // TODO add your handling code here:
+        loadUserData();
+    }//GEN-LAST:event_jTabbedPane2MouseClicked
 
     /**
      * @param args the command line arguments
@@ -1496,13 +1662,13 @@ public class Principal extends javax.swing.JFrame {
     private javax.swing.JDialog Orders;
     private javax.swing.JDialog Settings;
     private javax.swing.JDialog Users;
+    private javax.swing.JToggleButton borrar_table;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
     private javax.swing.JButton jButton6;
-    private javax.swing.JComboBox<String> jComboBox1;
     private javax.swing.JComboBox<String> jComboBox10;
     private javax.swing.JComboBox<String> jComboBox2;
     private javax.swing.JComboBox<String> jComboBox3;
@@ -1570,7 +1736,6 @@ public class Principal extends javax.swing.JFrame {
     private javax.swing.JPanel jPanellp5;
     private javax.swing.JPanel jPanellp6;
     private javax.swing.JPasswordField jPasswordField1;
-    private javax.swing.JPasswordField jPasswordField2;
     private javax.swing.JRadioButton jRadioButton1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
@@ -1584,10 +1749,7 @@ public class Principal extends javax.swing.JFrame {
     private javax.swing.JTable jTable3;
     private javax.swing.JTable jTable4;
     private javax.swing.JTable jTable5;
-    private javax.swing.JTextField jTextField1;
     private javax.swing.JTextField jTextField10;
-    private javax.swing.JTextField jTextField2;
-    private javax.swing.JTextField jTextField3;
     private javax.swing.JTextField jTextField4;
     private javax.swing.JTextField jTextField5;
     private javax.swing.JTextField jTextField6;
@@ -1601,7 +1763,6 @@ public class Principal extends javax.swing.JFrame {
     private javax.swing.JToggleButton jToggleButton13;
     private javax.swing.JToggleButton jToggleButton14;
     private javax.swing.JToggleButton jToggleButton15;
-    private javax.swing.JToggleButton jToggleButton16;
     private javax.swing.JToggleButton jToggleButton18;
     private javax.swing.JToggleButton jToggleButton2;
     private javax.swing.JToggleButton jToggleButton3;
@@ -1611,5 +1772,10 @@ public class Principal extends javax.swing.JFrame {
     private javax.swing.JToggleButton jToggleButton7;
     private javax.swing.JToggleButton jToggleButton8;
     private javax.swing.JToggleButton jToggleButton9;
+    private javax.swing.JTextField users_apellido;
+    private javax.swing.JTextField users_correo;
+    private javax.swing.JTextField users_name;
+    private javax.swing.JPasswordField users_password;
+    private javax.swing.JComboBox<String> userscombo_estado;
     // End of variables declaration//GEN-END:variables
 }
