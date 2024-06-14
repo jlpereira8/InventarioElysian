@@ -820,6 +820,21 @@ public class Principal extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Error al cambiar el estado de la orden", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
+     private void showContactAdminMessage() {
+    JOptionPane.showMessageDialog(this, "Contacta al administrador: Elysianhn@gmail.com", "Contacto", JOptionPane.INFORMATION_MESSAGE);
+     }
+       
+    private void saveCredentials(String email, String password) {
+    // Guardar el email y la contraseña en los campos
+    jTextField4.setText(email);
+    jPasswordField1.setText(password);
+}
+
+    private void clearCredentials() {
+        // Borrar el email y la contraseña de los campos
+        jTextField4.setText("");
+        jPasswordField1.setText("");
+    }
 
 
 
@@ -2097,6 +2112,11 @@ public class Principal extends javax.swing.JFrame {
 
         jLabel7.setBackground(new java.awt.Color(240, 211, 200));
         jLabel7.setText("¿Has olvidado tu contraseña?");
+        jLabel7.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabel7MouseClicked(evt);
+            }
+        });
 
         jLabel8.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
         jLabel8.setText("Usuario");
@@ -2164,25 +2184,44 @@ public class Principal extends javax.swing.JFrame {
     private void jButton1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton1MouseClicked
     String email = jTextField4.getText();
     String password = new String(jPasswordField1.getPassword());
-    if (email.equals("admin")&&password.equals("admin")) {
-            jToggleButton1.setVisible(true);
-            jButton6.setVisible(true);
-            Landingpage.pack();
-            Landingpage.setLocationRelativeTo(this);
-            Landingpage.setVisible(true);
-            this.setVisible(false);
-            Principal.addDialog(Landingpage);
-    }else if (authenticate(email, password)) {
-            jToggleButton1.setVisible(false);
-            jButton6.setVisible(false);
-            Landingpage.pack();
-            Landingpage.setLocationRelativeTo(this);
-            Landingpage.setVisible(true);
-            this.setVisible(false);
-            Principal.addDialog(Landingpage);
+
+    if (email.equals("admin") && password.equals("admin")) {
+        if (jRadioButton1.isSelected()) {
+            // Recordar el usuario y la contraseña
+            saveCredentials(email, password);
         } else {
-            JOptionPane.showMessageDialog(this, "Invalid credentials", "Error", JOptionPane.ERROR_MESSAGE);
+            // Borrar los campos si no está seleccionado
+            clearCredentials();
         }
+
+        jToggleButton1.setVisible(true);
+        jButton6.setVisible(true);
+        Landingpage.pack();
+        Landingpage.setLocationRelativeTo(this);
+        Landingpage.setVisible(true);
+        this.setVisible(false);
+        Principal.addDialog(Landingpage);
+
+    } else if (authenticate(email, password)) {
+        if (jRadioButton1.isSelected()) {
+            // Recordar el usuario y la contraseña
+            saveCredentials(email, password);
+        } else {
+            // Borrar los campos si no está seleccionado
+            clearCredentials();
+        }
+
+        jToggleButton1.setVisible(false);
+        jButton6.setVisible(false);
+        Landingpage.pack();
+        Landingpage.setLocationRelativeTo(this);
+        Landingpage.setVisible(true);
+        this.setVisible(false);
+        Principal.addDialog(Landingpage);
+
+    } else {
+        JOptionPane.showMessageDialog(this, "Invalid credentials", "Error", JOptionPane.ERROR_MESSAGE);
+    }
     }//GEN-LAST:event_jButton1MouseClicked
 
     private void jToggleButton1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jToggleButton1MouseClicked
@@ -2449,6 +2488,10 @@ public class Principal extends javax.swing.JFrame {
     private void jToggleButton7MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jToggleButton7MouseClicked
         toggleOrderStatus();
     }//GEN-LAST:event_jToggleButton7MouseClicked
+
+    private void jLabel7MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel7MouseClicked
+        showContactAdminMessage();
+    }//GEN-LAST:event_jLabel7MouseClicked
 
     /**
      * @param args the command line arguments
