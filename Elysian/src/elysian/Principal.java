@@ -7,6 +7,7 @@ package elysian;
 
 
 //BDD
+import com.itextpdf.text.BaseColor;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -25,6 +26,20 @@ import java.io.IOException;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Element;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.Image;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Phrase;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
+import java.io.FileOutputStream;
+import java.text.SimpleDateFormat;
+
+
 
 /**
  *
@@ -108,6 +123,108 @@ public class Principal extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Error al registrar el usuario", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
+ 
+
+       private void generateReceipt() throws DocumentException, IOException {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Guardar recibo");
+        int userSelection = fileChooser.showSaveDialog(this);
+
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            File fileToSave = fileChooser.getSelectedFile();
+            String filePath = fileToSave.getAbsolutePath();
+
+            if (!filePath.endsWith(".pdf")) {
+                filePath += ".pdf";
+            }
+
+            Document document = new Document();
+            PdfWriter.getInstance(document, new FileOutputStream(filePath));
+            document.open();
+
+            // Agregar logo de la empresa
+            Image logo = Image.getInstance("src/elysian/images/login(3).jpg");
+            logo.setAlignment(Element.ALIGN_CENTER);
+            logo.scaleToFit(100, 100);
+            document.add(logo);
+
+            // Nombre de la empresa
+            Font boldFont = new Font(Font.FontFamily.TIMES_ROMAN, 18, Font.BOLD);
+            Paragraph companyName = new Paragraph("ElysianHN", boldFont);
+            companyName.setAlignment(Element.ALIGN_CENTER);
+            document.add(companyName);
+
+            // Fecha
+
+            document.add(new Paragraph("Fecha: " + "6/14/2024"));
+
+            // Número de contacto
+            document.add(new Paragraph("Contacto: +504 8759-6371"));
+
+            // Línea en blanco
+            document.add(new Paragraph(" "));
+
+            // Nombre del cliente
+            String cliente = clients_cbname.getSelectedItem().toString();
+            document.add(new Paragraph("Cliente: " + cliente));
+            document.add(new Paragraph(" ")); // Línea en blanco
+
+            // Tabla de productos
+            PdfPTable table = new PdfPTable(4);
+            table.setWidthPercentage(100);
+            table.setSpacingBefore(10f);
+            table.setSpacingAfter(10f);
+
+            // Encabezados de la tabla
+            PdfPCell cell1 = new PdfPCell(new Phrase("Producto"));
+            cell1.setHorizontalAlignment(Element.ALIGN_CENTER);
+            cell1.setBackgroundColor(BaseColor.LIGHT_GRAY);
+            PdfPCell cell2 = new PdfPCell(new Phrase("Categoria"));
+            cell2.setHorizontalAlignment(Element.ALIGN_CENTER);
+            cell2.setBackgroundColor(BaseColor.LIGHT_GRAY);
+            PdfPCell cell3 = new PdfPCell(new Phrase("Material"));
+            cell3.setHorizontalAlignment(Element.ALIGN_CENTER);
+            cell3.setBackgroundColor(BaseColor.LIGHT_GRAY);
+            PdfPCell cell4 = new PdfPCell(new Phrase("Precio"));
+            cell4.setHorizontalAlignment(Element.ALIGN_CENTER);
+            cell4.setBackgroundColor(BaseColor.LIGHT_GRAY);
+
+            table.addCell(cell1);
+            table.addCell(cell2);
+            table.addCell(cell3);
+            table.addCell(cell4);
+
+            // Datos de la tabla
+            DefaultTableModel model = (DefaultTableModel) jTable3.getModel();
+            int rowCount = model.getRowCount();
+
+            double total = 0;
+            for (int i = 0; i < rowCount; i++) {
+                String producto = model.getValueAt(i, 0).toString();
+                String categoria = model.getValueAt(i, 1).toString();
+                String material = model.getValueAt(i, 2).toString();
+                double precio = Double.parseDouble(model.getValueAt(i, 3).toString());
+
+                table.addCell(producto);
+                table.addCell(categoria);
+                table.addCell(material);
+                table.addCell(String.format("%.2f", precio));
+
+                total += precio;
+            }
+
+            document.add(table);
+
+            // Total
+            document.add(new Paragraph("Total: " + String.format("%.2f", total)));
+
+            document.close();
+
+            JOptionPane.showMessageDialog(this, "Recibo generado exitosamente");
+        }
+    }
+
+
 
     private boolean isEmailRegistered(String email) {
         String query = "SELECT COUNT(*) FROM Usuarios WHERE Correo = ?";
@@ -418,7 +535,99 @@ public class Principal extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Error al eliminar el cliente", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
+      
+      private void loadClientNames() {
+        String query = "SELECT Nombre FROM Clientes";
+
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+
+            clients_cbname.removeAllItems(); // Limpiar el combo box antes de cargar datos
+
+            while (rs.next()) {
+                String nombre = rs.getString("Nombre");
+                clients_cbname.addItem(nombre);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error al cargar los nombres de los clientes", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void loadProductNames() {
+        String query = "SELECT Producto FROM Productos";
+
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+
+            clients_cbproduct.removeAllItems(); // Limpiar el combo box antes de cargar datos
+
+            while (rs.next()) {
+                String producto = rs.getString("Producto");
+                clients_cbproduct.addItem(producto);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error al cargar los nombres de los productos", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    private void addItemToTable() {
+        String selectedItem = clients_cbproduct.getSelectedItem().toString();
+
+        String query = "SELECT Producto, Categoria, Material, Precio FROM Productos WHERE Producto = ?";
+
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setString(1, selectedItem);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                String producto = rs.getString("Producto");
+                String categoria = rs.getString("Categoria");
+                String material = rs.getString("Material");
+                double precio = rs.getDouble("Precio");
+
+                DefaultTableModel model = (DefaultTableModel) jTable3.getModel();
+                model.addRow(new Object[]{producto, categoria, material, precio});
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error al agregar el producto a la tabla", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void updateTotal() {
+        DefaultTableModel model = (DefaultTableModel) jTable3.getModel();
+        int rowCount = model.getRowCount();
+        double total = 0;
+
+        for (int i = 0; i < rowCount; i++) {
+            total += (double) model.getValueAt(i, 3); // Asumiendo que la columna 3 es el precio
+        }
+
+        clients_total.setText(String.format("%.2f", total));
+    }
     // Lista estática para almacenar los diálogos abiertos
+    
+    private void deleteSelectedRow() {
+    int selectedRow = jTable3.getSelectedRow();
+    
+    if (selectedRow == -1) {
+        JOptionPane.showMessageDialog(this, "Selecciona una fila para eliminar", "Error", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+    
+    DefaultTableModel model = (DefaultTableModel) jTable3.getModel();
+    model.removeRow(selectedRow);
+}
+
+
     private static ArrayList<JDialog> dialogList = new ArrayList<>();
 
     // Método para añadir un diálogo a la lista
@@ -514,25 +723,20 @@ public class Principal extends javax.swing.JFrame {
         Orders = new javax.swing.JDialog();
         jTabbedPane1 = new javax.swing.JTabbedPane();
         jPanellp3 = new javax.swing.JPanel();
-        jLabel34 = new javax.swing.JLabel();
-        jLabel35 = new javax.swing.JLabel();
+        clients_total = new javax.swing.JLabel();
         jLabel36 = new javax.swing.JLabel();
-        jLabel37 = new javax.swing.JLabel();
-        jTextField9 = new javax.swing.JTextField();
         jLabel38 = new javax.swing.JLabel();
-        jLabel39 = new javax.swing.JLabel();
-        jComboBox7 = new javax.swing.JComboBox<>();
-        jComboBox8 = new javax.swing.JComboBox<>();
         jToggleButton10 = new javax.swing.JToggleButton();
         jToggleButton11 = new javax.swing.JToggleButton();
         jScrollPane3 = new javax.swing.JScrollPane();
         jTable3 = new javax.swing.JTable();
         jToggleButton12 = new javax.swing.JToggleButton();
-        jComboBox9 = new javax.swing.JComboBox<>();
+        clients_cbproduct = new javax.swing.JComboBox<>();
         jLabel40 = new javax.swing.JLabel();
         jToggleButton13 = new javax.swing.JToggleButton();
         jLabel41 = new javax.swing.JLabel();
-        jComboBox10 = new javax.swing.JComboBox<>();
+        clients_cbname = new javax.swing.JComboBox<>();
+        jLabel35 = new javax.swing.JLabel();
         jPanellp2 = new javax.swing.JPanel();
         jLabel31 = new javax.swing.JLabel();
         jScrollPane2 = new javax.swing.JScrollPane();
@@ -1115,22 +1319,10 @@ public class Principal extends javax.swing.JFrame {
         jPanellp3.setBackground(new java.awt.Color(240, 211, 200));
         jPanellp3.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
 
-        jLabel34.setFont(new java.awt.Font("Segoe UI", 1, 36)); // NOI18N
-        jLabel34.setText("Total:");
-
-        jLabel35.setText("Categoria:");
+        clients_total.setFont(new java.awt.Font("Segoe UI", 1, 36)); // NOI18N
+        clients_total.setText("x");
 
         jLabel36.setText("Producto:");
-
-        jLabel37.setText("Precio:");
-
-        jTextField9.setEditable(false);
-
-        jLabel39.setText("Material:");
-
-        jComboBox7.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Aritos", "Pulsera", "Cadena" }));
-
-        jComboBox8.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Oro", "Plata", "Acero" }));
 
         jToggleButton10.setBackground(new java.awt.Color(255, 255, 255));
         jToggleButton10.setText("Añadir Articulo");
@@ -1153,7 +1345,7 @@ public class Principal extends javax.swing.JFrame {
 
             },
             new String [] {
-                "Producto", "Precio", "Categoria", "Material"
+                "Producto", "Categoria", "Material", "Precio"
             }
         ));
         jScrollPane3.setViewportView(jTable3);
@@ -1166,7 +1358,7 @@ public class Principal extends javax.swing.JFrame {
             }
         });
 
-        jComboBox9.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Cadena de oro", "Cadena de plata" }));
+        clients_cbproduct.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Cadena de oro", "Cadena de plata" }));
 
         jLabel40.setFont(new java.awt.Font("Segoe UI", 1, 36)); // NOI18N
         jLabel40.setText("Crear Orden");
@@ -1181,7 +1373,10 @@ public class Principal extends javax.swing.JFrame {
 
         jLabel41.setText("Cliente:");
 
-        jComboBox10.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Jorge Gonzales" }));
+        clients_cbname.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Jorge Gonzales" }));
+
+        jLabel35.setFont(new java.awt.Font("Segoe UI", 1, 36)); // NOI18N
+        jLabel35.setText("Total:");
 
         javax.swing.GroupLayout jPanellp3Layout = new javax.swing.GroupLayout(jPanellp3);
         jPanellp3.setLayout(jPanellp3Layout);
@@ -1193,38 +1388,35 @@ public class Principal extends javax.swing.JFrame {
                         .addContainerGap()
                         .addGroup(jPanellp3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanellp3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                .addGroup(jPanellp3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addGroup(jPanellp3Layout.createSequentialGroup()
-                                        .addComponent(jLabel39)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                        .addComponent(jComboBox8, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                    .addGroup(jPanellp3Layout.createSequentialGroup()
-                                        .addGroup(jPanellp3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addComponent(jLabel36)
-                                            .addComponent(jLabel37)
-                                            .addComponent(jLabel35))
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addGroup(jPanellp3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addComponent(jTextField9)
-                                            .addComponent(jComboBox7, 0, 180, Short.MAX_VALUE)
-                                            .addComponent(jComboBox9, 0, 180, Short.MAX_VALUE)
-                                            .addComponent(jComboBox10, javax.swing.GroupLayout.Alignment.TRAILING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                                .addGroup(jPanellp3Layout.createSequentialGroup()
+                                    .addComponent(jLabel36)
+                                    .addGap(10, 10, 10)
+                                    .addGroup(jPanellp3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                        .addComponent(clients_cbproduct, 0, 180, Short.MAX_VALUE)
+                                        .addComponent(clients_cbname, javax.swing.GroupLayout.Alignment.TRAILING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                                 .addComponent(jToggleButton10, javax.swing.GroupLayout.PREFERRED_SIZE, 146, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addComponent(jLabel41))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 10, Short.MAX_VALUE)
                         .addGroup(jPanellp3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanellp3Layout.createSequentialGroup()
-                                .addComponent(jToggleButton13, javax.swing.GroupLayout.PREFERRED_SIZE, 155, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jToggleButton11, javax.swing.GroupLayout.PREFERRED_SIZE, 139, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanellp3Layout.createSequentialGroup()
+                                .addGap(0, 0, Short.MAX_VALUE)
+                                .addComponent(jLabel35)
                                 .addGap(18, 18, 18)
-                                .addComponent(jToggleButton12, javax.swing.GroupLayout.PREFERRED_SIZE, 151, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(clients_total)
+                                .addGap(232, 232, 232))
                             .addGroup(jPanellp3Layout.createSequentialGroup()
-                                .addComponent(jLabel38)
-                                .addGap(27, 27, 27)
                                 .addGroup(jPanellp3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel34)
-                                    .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 430, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                                    .addGroup(jPanellp3Layout.createSequentialGroup()
+                                        .addComponent(jToggleButton13, javax.swing.GroupLayout.PREFERRED_SIZE, 155, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(jToggleButton11, javax.swing.GroupLayout.PREFERRED_SIZE, 139, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(jToggleButton12, javax.swing.GroupLayout.PREFERRED_SIZE, 151, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(jPanellp3Layout.createSequentialGroup()
+                                        .addComponent(jLabel38)
+                                        .addGap(27, 27, 27)
+                                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 430, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addGap(0, 0, Short.MAX_VALUE))))
                     .addGroup(jPanellp3Layout.createSequentialGroup()
                         .addGap(270, 270, 270)
                         .addComponent(jLabel40)))
@@ -1244,31 +1436,22 @@ public class Principal extends javax.swing.JFrame {
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanellp3Layout.createSequentialGroup()
                                 .addGap(41, 41, 41)
                                 .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 352, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 61, Short.MAX_VALUE)
-                        .addComponent(jLabel34)
-                        .addGap(26, 26, 26))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(jPanellp3Layout.createSequentialGroup()
                         .addGap(65, 65, 65)
                         .addGroup(jPanellp3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel41)
-                            .addComponent(jComboBox10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(clients_cbname, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(39, 39, 39)
                         .addGroup(jPanellp3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel36)
-                            .addComponent(jComboBox9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(39, 39, 39)
-                        .addGroup(jPanellp3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel37)
-                            .addComponent(jTextField9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(33, 33, 33)
-                        .addGroup(jPanellp3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel35)
-                            .addComponent(jComboBox7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(29, 29, 29)
-                        .addGroup(jPanellp3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel39)
-                            .addComponent(jComboBox8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(clients_cbproduct, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addGap(71, 71, 71)
+                .addGroup(jPanellp3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(clients_total)
+                    .addComponent(jLabel35))
+                .addGap(73, 73, 73)
                 .addGroup(jPanellp3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jToggleButton10, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jToggleButton11, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -1333,7 +1516,7 @@ public class Principal extends javax.swing.JFrame {
                         .addComponent(jLabel33)
                         .addGap(18, 18, 18)
                         .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 463, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 48, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 105, Short.MAX_VALUE)
                 .addGroup(jPanellp2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jToggleButton6, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jToggleButton7, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -1809,22 +1992,6 @@ public class Principal extends javax.swing.JFrame {
         insertProduct(nombre, temp, categoria, material);
     }//GEN-LAST:event_jToggleButton4MouseClicked
 
-    private void jToggleButton10MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jToggleButton10MouseClicked
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jToggleButton10MouseClicked
-
-    private void jToggleButton11MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jToggleButton11MouseClicked
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jToggleButton11MouseClicked
-
-    private void jToggleButton12MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jToggleButton12MouseClicked
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jToggleButton12MouseClicked
-
-    private void jToggleButton13MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jToggleButton13MouseClicked
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jToggleButton13MouseClicked
-
     private void jButton4MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton4MouseClicked
         Inventory.pack();
         Inventory.setLocationRelativeTo(this);
@@ -1839,6 +2006,14 @@ public class Principal extends javax.swing.JFrame {
         Orders.setVisible(true);
         this.setVisible(false);
         Principal.addDialog(Orders);
+        
+        //clients_cbname nombre (cargar combo box con todos los nombres de la tabla CLIENTES)
+        //clients_cbproduc productos (cargar combo box con todos los productos de la tabla PRODUCTOS)
+        // Cargar nombres de clientes en el combo box
+        loadClientNames();
+
+        // Cargar nombres de productos en el combo box
+        loadProductNames();
     }//GEN-LAST:event_jButton2MouseClicked
 
     private void jToggleButton9MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jToggleButton9MouseClicked
@@ -1874,6 +2049,9 @@ public class Principal extends javax.swing.JFrame {
         Clientes.setVisible(true);
         this.setVisible(false);
         Principal.addDialog(Clientes);
+        
+        
+        
     }//GEN-LAST:event_jButton3MouseClicked
 
     private void jButton5MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton5MouseClicked
@@ -2006,6 +2184,31 @@ public class Principal extends javax.swing.JFrame {
          loadClientData();
     }//GEN-LAST:event_jTabbedPane4MouseClicked
 
+    private void jToggleButton13MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jToggleButton13MouseClicked
+        // TODO add your handling code here:
+        deleteSelectedRow();
+        updateTotal();
+    }//GEN-LAST:event_jToggleButton13MouseClicked
+
+    private void jToggleButton12MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jToggleButton12MouseClicked
+        // TODO add your handling code here:
+         try {
+            generateReceipt();
+        } catch (DocumentException | IOException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error al generar el recibo", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_jToggleButton12MouseClicked
+
+    private void jToggleButton11MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jToggleButton11MouseClicked
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jToggleButton11MouseClicked
+
+    private void jToggleButton10MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jToggleButton10MouseClicked
+            addItemToTable();
+            updateTotal();
+    }//GEN-LAST:event_jToggleButton10MouseClicked
+
     /**
      * @param args the command line arguments
      */
@@ -2054,16 +2257,15 @@ public class Principal extends javax.swing.JFrame {
     private javax.swing.JComboBox<String> clientes_categoria;
     private javax.swing.JLabel clientes_descuento;
     private javax.swing.JTextField clientes_nombre;
+    private javax.swing.JComboBox<String> clients_cbname;
+    private javax.swing.JComboBox<String> clients_cbproduct;
+    private javax.swing.JLabel clients_total;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
     private javax.swing.JButton jButton6;
-    private javax.swing.JComboBox<String> jComboBox10;
-    private javax.swing.JComboBox<String> jComboBox7;
-    private javax.swing.JComboBox<String> jComboBox8;
-    private javax.swing.JComboBox<String> jComboBox9;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
@@ -2091,12 +2293,9 @@ public class Principal extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel31;
     private javax.swing.JLabel jLabel32;
     private javax.swing.JLabel jLabel33;
-    private javax.swing.JLabel jLabel34;
     private javax.swing.JLabel jLabel35;
     private javax.swing.JLabel jLabel36;
-    private javax.swing.JLabel jLabel37;
     private javax.swing.JLabel jLabel38;
-    private javax.swing.JLabel jLabel39;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel40;
     private javax.swing.JLabel jLabel41;
@@ -2146,7 +2345,6 @@ public class Principal extends javax.swing.JFrame {
     private javax.swing.JTable jTable7;
     private javax.swing.JTextField jTextField10;
     private javax.swing.JTextField jTextField4;
-    private javax.swing.JTextField jTextField9;
     private javax.swing.JToggleButton jToggleButton1;
     private javax.swing.JToggleButton jToggleButton10;
     private javax.swing.JToggleButton jToggleButton11;
