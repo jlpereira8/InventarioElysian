@@ -951,6 +951,9 @@
       </Layout>
       <SubComponents>
         <Container class="javax.swing.JTabbedPane" name="jTabbedPane1">
+          <Events>
+            <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jTabbedPane1MouseClicked"/>
+          </Events>
 
           <Layout class="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout"/>
           <SubComponents>
@@ -1234,25 +1237,28 @@
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" attributes="0">
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Group type="102" attributes="0">
-                                  <EmptySpace min="-2" pref="24" max="-2" attributes="0"/>
-                                  <Component id="jScrollPane2" min="-2" pref="748" max="-2" attributes="0"/>
-                                  <EmptySpace max="-2" attributes="0"/>
-                                  <Component id="jLabel31" min="-2" max="-2" attributes="0"/>
-                              </Group>
                               <Group type="102" alignment="0" attributes="0">
                                   <EmptySpace min="-2" pref="305" max="-2" attributes="0"/>
                                   <Component id="jLabel33" min="-2" max="-2" attributes="0"/>
                               </Group>
+                              <Group type="102" alignment="0" attributes="0">
+                                  <EmptySpace min="-2" pref="24" max="-2" attributes="0"/>
+                                  <Group type="103" groupAlignment="1" attributes="0">
+                                      <Group type="102" attributes="0">
+                                          <Component id="jToggleButton7" min="-2" max="-2" attributes="0"/>
+                                          <EmptySpace min="-2" pref="34" max="-2" attributes="0"/>
+                                          <Component id="jToggleButton8" min="-2" pref="207" max="-2" attributes="0"/>
+                                          <EmptySpace min="-2" pref="34" max="-2" attributes="0"/>
+                                          <Component id="jToggleButton6" min="-2" pref="207" max="-2" attributes="0"/>
+                                          <EmptySpace min="-2" pref="18" max="-2" attributes="0"/>
+                                      </Group>
+                                      <Component id="jScrollPane2" min="-2" pref="748" max="-2" attributes="0"/>
+                                  </Group>
+                                  <EmptySpace max="-2" attributes="0"/>
+                                  <Component id="jLabel31" min="-2" max="-2" attributes="0"/>
+                              </Group>
                           </Group>
                           <EmptySpace max="32767" attributes="0"/>
-                      </Group>
-                      <Group type="102" alignment="1" attributes="0">
-                          <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-                          <Component id="jToggleButton7" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace min="-2" pref="87" max="-2" attributes="0"/>
-                          <Component id="jToggleButton6" min="-2" pref="207" max="-2" attributes="0"/>
-                          <EmptySpace min="-2" pref="133" max="-2" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -1275,6 +1281,7 @@
                           <Group type="103" groupAlignment="3" attributes="0">
                               <Component id="jToggleButton6" alignment="3" min="-2" pref="71" max="-2" attributes="0"/>
                               <Component id="jToggleButton7" alignment="3" min="-2" pref="71" max="-2" attributes="0"/>
+                              <Component id="jToggleButton8" alignment="3" min="-2" pref="71" max="-2" attributes="0"/>
                           </Group>
                           <EmptySpace min="-2" pref="37" max="-2" attributes="0"/>
                       </Group>
@@ -1294,8 +1301,10 @@
                     <Component class="javax.swing.JTable" name="jTable2">
                       <Properties>
                         <Property name="model" type="javax.swing.table.TableModel" editor="org.netbeans.modules.form.editors2.TableModelEditor">
-                          <Table columnCount="3" rowCount="0">
+                          <Table columnCount="5" rowCount="0">
+                            <Column editable="true" title="ID" type="java.lang.Object"/>
                             <Column editable="true" title="Orden#" type="java.lang.Object"/>
+                            <Column editable="true" title="Productos" type="java.lang.Object"/>
                             <Column editable="true" title="Costo" type="java.lang.Object"/>
                             <Column editable="true" title="Estado" type="java.lang.Object"/>
                           </Table>
@@ -1316,11 +1325,25 @@
                   <Properties>
                     <Property name="text" type="java.lang.String" value="Eliminar"/>
                   </Properties>
+                  <Events>
+                    <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jToggleButton6MouseClicked"/>
+                  </Events>
                 </Component>
                 <Component class="javax.swing.JToggleButton" name="jToggleButton7">
                   <Properties>
                     <Property name="text" type="java.lang.String" value="Entregada/No entregada"/>
                   </Properties>
+                  <Events>
+                    <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jToggleButton7MouseClicked"/>
+                  </Events>
+                </Component>
+                <Component class="javax.swing.JToggleButton" name="jToggleButton8">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" value="Mostrar Detalles"/>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jToggleButton8MouseClicked"/>
+                  </Events>
                 </Component>
               </SubComponents>
             </Container>

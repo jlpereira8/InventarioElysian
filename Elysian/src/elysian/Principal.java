@@ -38,6 +38,7 @@ import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
+import java.util.Random;
 
 
 
@@ -48,7 +49,7 @@ import java.text.SimpleDateFormat;
 public class Principal extends javax.swing.JFrame {
 
 
-    private static String DB_URL = "jdbc:ucanaccess://C:\\Users\\j0c3lwiz\\Desktop\\Elysian.accdb";
+    private static String DB_URL = "jdbc:ucanaccess://src/databases/Elysian.accdb";
     private static final String DB_USER = "";
     private static final String DB_PASSWORD = "";
     
@@ -626,6 +627,200 @@ public class Principal extends javax.swing.JFrame {
     DefaultTableModel model = (DefaultTableModel) jTable3.getModel();
     model.removeRow(selectedRow);
 }
+        private void loadOrderData() {
+        String query = "SELECT * FROM ORDENES";
+
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+
+            DefaultTableModel model = (DefaultTableModel) jTable2.getModel();
+            model.setRowCount(0); // Limpiar la tabla antes de cargar datos
+
+            while (rs.next()) {
+                int id = rs.getInt("id"); // Asumiendo que 'id' es de tipo INTEGER en la base de datos
+                String codigo = rs.getString("codigo"); // Asegúrate de que este campo sea VARCHAR en la base de datos
+                String listaProductos = rs.getString("listaproductos");
+                double costo = rs.getDouble("costo");
+                String estado = rs.getString("estado");
+
+                model.addRow(new Object[]{id, codigo, listaProductos, costo, estado});
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error al cargar los datos", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+        
+        private void saveNewOrder() {
+        DefaultTableModel model = (DefaultTableModel) jTable3.getModel();
+        int rowCount = model.getRowCount();
+
+        if (rowCount == 0) {
+            JOptionPane.showMessageDialog(this, "No hay artículos en la lista", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        StringBuilder listaProductos = new StringBuilder();
+        double total = 0;
+
+        for (int i = 0; i < rowCount; i++) {
+            String producto = model.getValueAt(i, 0).toString();
+            double precio = Double.parseDouble(model.getValueAt(i, 3).toString());
+
+            listaProductos.append(producto);
+            if (i < rowCount - 1) {
+                listaProductos.append(", ");
+            }
+
+            total += precio;
+        }
+
+        String codigo = generateRandomCode();
+        String estado = "No entregado";
+
+        // Guardar la nueva orden en la base de datos
+        String query = "INSERT INTO ORDENES (codigo, listaproductos, costo, estado) VALUES (?, ?, ?, ?)";
+
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setString(1, codigo);
+            stmt.setString(2, listaProductos.toString());
+            stmt.setDouble(3, total);
+            stmt.setString(4, estado);
+
+            stmt.executeUpdate();
+            JOptionPane.showMessageDialog(this, "Orden guardada exitosamente");
+
+            // Vaciar la tabla después de guardar la orden
+            model.setRowCount(0);
+            clients_total.setText(String.format("%.2f", 0.0));
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error al guardar la orden", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+
+    private String generateRandomCode() {
+        int length = 8;
+        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        Random random = new Random();
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < length; i++) {
+            int index = random.nextInt(characters.length());
+            sb.append(characters.charAt(index));
+        }
+
+        return sb.toString();
+    }
+
+       private void showSelectedOrderDetails() {
+        int selectedRow = jTable2.getSelectedRow();
+
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Por favor, selecciona una orden para ver los detalles", "Detalles de Órdenes", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        DefaultTableModel model = (DefaultTableModel) jTable2.getModel();
+        int columnCount = model.getColumnCount();
+
+        StringBuilder details = new StringBuilder();
+        details.append("Detalles de la Orden Seleccionada:\n\n");
+
+        for (int i = 0; i < columnCount; i++) {
+            String columnName = model.getColumnName(i);
+            String value = model.getValueAt(selectedRow, i).toString();
+            if (columnName.equals("listaproductos")) {
+                details.append(columnName).append(":").append("\n");
+                String[] productos = value.split(", ");
+                for (int j = 0; j < productos.length; j++) {
+                    details.append((j + 1)).append(". ").append(productos[j]).append("\n");
+                }
+            } else {
+                details.append(columnName).append(": ").append(value).append("\n");
+            }
+        }
+
+        JOptionPane.showMessageDialog(this, details.toString(), "Detalles de Órdenes", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+       private void deleteSelectedOrder() {
+        int selectedRow = jTable2.getSelectedRow();
+
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Por favor, selecciona una orden para eliminar", "Eliminar Orden", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        DefaultTableModel model = (DefaultTableModel) jTable2.getModel();
+        int orderId = (int) model.getValueAt(selectedRow, 0); // Asumiendo que la primera columna es el ID
+
+        // Eliminar la orden de la base de datos
+        String query = "DELETE FROM ORDENES WHERE id = ?";
+
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setInt(1, orderId);
+
+            int rowsAffected = stmt.executeUpdate();
+            if (rowsAffected > 0) {
+                // Eliminar la fila del modelo de tabla
+                model.removeRow(selectedRow);
+                JOptionPane.showMessageDialog(this, "Orden eliminada exitosamente");
+            } else {
+                JOptionPane.showMessageDialog(this, "No se pudo eliminar la orden", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error al eliminar la orden", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+       private void toggleOrderStatus() {
+        int selectedRow = jTable2.getSelectedRow();
+
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Por favor, selecciona una orden para cambiar su estado", "Cambiar Estado de Orden", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        DefaultTableModel model = (DefaultTableModel) jTable2.getModel();
+        int orderId = (int) model.getValueAt(selectedRow, 0); // Asumiendo que la primera columna es el ID
+        String currentStatus = model.getValueAt(selectedRow, 4).toString(); // Asumiendo que la cuarta columna es el estado
+        String newStatus = currentStatus.equals("Entregada") ? "No Entregada" : "Entregada";
+
+        // Actualizar el estado de la orden en la base de datos
+        String query = "UPDATE ORDENES SET estado = ? WHERE id = ?";
+
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setString(1, newStatus);
+            stmt.setInt(2, orderId);
+
+            int rowsAffected = stmt.executeUpdate();
+            if (rowsAffected > 0) {
+                // Actualizar el estado en el modelo de tabla
+                model.setValueAt(newStatus, selectedRow, 4);
+                JOptionPane.showMessageDialog(this, "Estado de la orden cambiado exitosamente");
+            } else {
+                JOptionPane.showMessageDialog(this, "No se pudo cambiar el estado de la orden", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error al cambiar el estado de la orden", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
 
 
     private static ArrayList<JDialog> dialogList = new ArrayList<>();
@@ -744,6 +939,7 @@ public class Principal extends javax.swing.JFrame {
         jLabel33 = new javax.swing.JLabel();
         jToggleButton6 = new javax.swing.JToggleButton();
         jToggleButton7 = new javax.swing.JToggleButton();
+        jToggleButton8 = new javax.swing.JToggleButton();
         Clientes = new javax.swing.JDialog();
         jTabbedPane4 = new javax.swing.JTabbedPane();
         jPanellp4 = new javax.swing.JPanel();
@@ -1316,6 +1512,12 @@ public class Principal extends javax.swing.JFrame {
                 .addGap(0, 0, Short.MAX_VALUE))
         );
 
+        jTabbedPane1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jTabbedPane1MouseClicked(evt);
+            }
+        });
+
         jPanellp3.setBackground(new java.awt.Color(240, 211, 200));
         jPanellp3.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
 
@@ -1470,7 +1672,7 @@ public class Principal extends javax.swing.JFrame {
 
             },
             new String [] {
-                "Orden#", "Costo", "Estado"
+                "ID", "Orden#", "Productos", "Costo", "Estado"
             }
         ));
         jScrollPane2.setViewportView(jTable2);
@@ -1479,8 +1681,25 @@ public class Principal extends javax.swing.JFrame {
         jLabel33.setText("Ordenes");
 
         jToggleButton6.setText("Eliminar");
+        jToggleButton6.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jToggleButton6MouseClicked(evt);
+            }
+        });
 
         jToggleButton7.setText("Entregada/No entregada");
+        jToggleButton7.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jToggleButton7MouseClicked(evt);
+            }
+        });
+
+        jToggleButton8.setText("Mostrar Detalles");
+        jToggleButton8.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jToggleButton8MouseClicked(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanellp2Layout = new javax.swing.GroupLayout(jPanellp2);
         jPanellp2.setLayout(jPanellp2Layout);
@@ -1489,20 +1708,22 @@ public class Principal extends javax.swing.JFrame {
             .addGroup(jPanellp2Layout.createSequentialGroup()
                 .addGroup(jPanellp2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanellp2Layout.createSequentialGroup()
-                        .addGap(24, 24, 24)
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 748, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel31))
-                    .addGroup(jPanellp2Layout.createSequentialGroup()
                         .addGap(305, 305, 305)
-                        .addComponent(jLabel33)))
+                        .addComponent(jLabel33))
+                    .addGroup(jPanellp2Layout.createSequentialGroup()
+                        .addGap(24, 24, 24)
+                        .addGroup(jPanellp2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(jPanellp2Layout.createSequentialGroup()
+                                .addComponent(jToggleButton7)
+                                .addGap(34, 34, 34)
+                                .addComponent(jToggleButton8, javax.swing.GroupLayout.PREFERRED_SIZE, 207, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(34, 34, 34)
+                                .addComponent(jToggleButton6, javax.swing.GroupLayout.PREFERRED_SIZE, 207, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18))
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 748, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel31)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanellp2Layout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(jToggleButton7)
-                .addGap(87, 87, 87)
-                .addComponent(jToggleButton6, javax.swing.GroupLayout.PREFERRED_SIZE, 207, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(133, 133, 133))
         );
         jPanellp2Layout.setVerticalGroup(
             jPanellp2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1519,7 +1740,8 @@ public class Principal extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 105, Short.MAX_VALUE)
                 .addGroup(jPanellp2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jToggleButton6, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jToggleButton7, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jToggleButton7, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jToggleButton8, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(37, 37, 37))
         );
 
@@ -2201,13 +2423,32 @@ public class Principal extends javax.swing.JFrame {
     }//GEN-LAST:event_jToggleButton12MouseClicked
 
     private void jToggleButton11MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jToggleButton11MouseClicked
-        // TODO add your handling code here:
+        // jTable3
+         saveNewOrder();
     }//GEN-LAST:event_jToggleButton11MouseClicked
 
     private void jToggleButton10MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jToggleButton10MouseClicked
             addItemToTable();
             updateTotal();
     }//GEN-LAST:event_jToggleButton10MouseClicked
+
+    private void jTabbedPane1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTabbedPane1MouseClicked
+        // TODO add your handling code here:
+        loadOrderData();
+    }//GEN-LAST:event_jTabbedPane1MouseClicked
+
+    private void jToggleButton8MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jToggleButton8MouseClicked
+        // TODO add your handling code here:
+        showSelectedOrderDetails();
+    }//GEN-LAST:event_jToggleButton8MouseClicked
+
+    private void jToggleButton6MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jToggleButton6MouseClicked
+        deleteSelectedOrder();
+    }//GEN-LAST:event_jToggleButton6MouseClicked
+
+    private void jToggleButton7MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jToggleButton7MouseClicked
+        toggleOrderStatus();
+    }//GEN-LAST:event_jToggleButton7MouseClicked
 
     /**
      * @param args the command line arguments
@@ -2360,6 +2601,7 @@ public class Principal extends javax.swing.JFrame {
     private javax.swing.JToggleButton jToggleButton4;
     private javax.swing.JToggleButton jToggleButton6;
     private javax.swing.JToggleButton jToggleButton7;
+    private javax.swing.JToggleButton jToggleButton8;
     private javax.swing.JToggleButton jToggleButton9;
     private javax.swing.JComboBox<String> product_categoria;
     private javax.swing.JComboBox<String> product_material;
