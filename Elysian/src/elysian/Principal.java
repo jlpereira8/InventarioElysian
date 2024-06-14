@@ -53,6 +53,8 @@ public class Principal extends javax.swing.JFrame {
     private static final String DB_USER = "";
     private static final String DB_PASSWORD = "";
     
+    
+    
     // Variables para la conexión a la base de datos
     private Connection conn;
     
